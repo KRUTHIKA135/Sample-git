@@ -402,3 +402,149 @@ public class OrderController {
         return ResponseEntity.notFound().build();
     }
 }
+---------
+// File: src/main/java/com/synechron/client/ItemClient.java
+package com.synechron.client;
+
+import com.synechron.dto.ItemDTO;
+import org.springframework.cloud.openfeign.FeignClient;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+
+@FeignClient(name = "ITEM-SERVICE")
+public interface ItemClient {
+    @GetMapping("/item/{id}")
+    ItemDTO getItemById(@PathVariable("id") Long id);
+}
+
+
+// File: src/main/java/com/synechron/service/OrderService.java
+package com.synechron.service;
+
+import com.synechron.client.ItemClient;
+import com.synechron.dto.ItemDTO;
+import com.synechron.entity.Order;
+import com.synechron.repository.OrderRepository;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+
+import java.util.List;
+import java.util.Optional;
+
+@Service
+public class OrderService {
+
+    @Autowired
+    private OrderRepository orderRepository;
+
+    @Autowired
+    private ItemClient itemClient;
+
+    public List<Order> getAllOrders() {
+        List<Order> orders = orderRepository.findAll();
+        for (Order order : orders) {
+            try {
+                ItemDTO item = itemClient.getItemById(order.getItemId());
+                order.setItem(item);
+            } catch (Exception e) {
+                order.setItem(null);
+            }
+        }
+        return orders;
+    }
+
+    public Optional<Order> getOrderById(Long id) {
+        Optional<Order> optionalOrder = orderRepository.findById(id);
+        optionalOrder.ifPresent(order -> {
+            try {
+                ItemDTO item = itemClient.getItemById(order.getItemId());
+                order.setItem(item);
+            } catch (Exception e) {
+                order.setItem(null);
+            }
+        });
+        return optionalOrder;
+    }
+
+    public Order placeOrder(Order order) {
+        try {
+            ItemDTO item = itemClient.getItemById(order.getItemId());
+            order.setItem(item);
+        } catch (Exception e) {
+            order.setItem(null);
+        }
+        return orderRepository.save(order);
+    }
+
+    public boolean deleteOrder(Long id) {
+        if (orderRepository.existsById(id)) {
+            orderRepository.deleteById(id);
+            return true;
+        }
+        return false;
+    }
+}
+
+
+// File: src/main/java/com/synechron/controller/OrderController.java
+package com.synechron.controller;
+
+import com.synechron.entity.Order;
+import com.synechron.service.OrderService;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
+
+import jakarta.validation.Valid;
+import java.util.List;
+
+@RestController
+@RequestMapping("/order")
+public class OrderController {
+
+    @Autowired
+    private OrderService orderService;
+
+    @GetMapping
+    public List<Order> getAllOrders() {
+        return orderService.getAllOrders();
+    }
+
+    @GetMapping("/{id}")
+    public ResponseEntity<Order> getOrderById(@PathVariable Long id) {
+        return orderService.getOrderById(id)
+                .map(ResponseEntity::ok)
+                .orElse(ResponseEntity.notFound().build());
+    }
+
+    @PostMapping
+    public ResponseEntity<Order> placeOrder(@RequestBody @Valid Order order) {
+        return ResponseEntity.ok(orderService.placeOrder(order));
+    }
+
+    @DeleteMapping("/{id}")
+    public ResponseEntity<String> deleteOrder(@PathVariable Long id) {
+        if (orderService.deleteOrder(id)) {
+            return ResponseEntity.ok("Order deleted successfully");
+        }
+        return ResponseEntity.notFound().build();
+    }
+}
+
+
+// File: src/main/java/com/synechron/OrderServiceApplication.java
+package com.synechron;
+
+import org.springframework.boot.SpringApplication;
+import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.cloud.openfeign.EnableFeignClients;
+
+@SpringBootApplication
+@EnableFeignClients
+public class OrderServiceApplication {
+
+    public static void main(String[] args) {
+        SpringApplication.run(OrderServiceApplication.class, args);
+    }
+}
+
