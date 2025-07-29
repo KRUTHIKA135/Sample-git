@@ -1,4 +1,4 @@
-// --- ITEM SERVICE ---
+// === ITEM SERVICE ===
 
 // File: item-service/src/main/java/com/synechron/entity/Item.java
 package com.synechron.entity;
@@ -22,7 +22,37 @@ public class Item {
     @Transient
     private OrderDTO order;
 
-    // Getters and Setters
+    public Long getItemId() {
+        return itemId;
+    }
+
+    public void setItemId(Long itemId) {
+        this.itemId = itemId;
+    }
+
+    public String getItemName() {
+        return itemName;
+    }
+
+    public void setItemName(String itemName) {
+        this.itemName = itemName;
+    }
+
+    public BigDecimal getItemPrice() {
+        return itemPrice;
+    }
+
+    public void setItemPrice(BigDecimal itemPrice) {
+        this.itemPrice = itemPrice;
+    }
+
+    public OrderDTO getOrder() {
+        return order;
+    }
+
+    public void setOrder(OrderDTO order) {
+        this.order = order;
+    }
 }
 
 // File: item-service/src/main/java/com/synechron/dto/OrderDTO.java
@@ -35,7 +65,45 @@ public class OrderDTO {
     private String customerName;
     private String customerMobile;
 
-    // Getters and Setters
+    public Long getOrderId() {
+        return orderId;
+    }
+
+    public void setOrderId(Long orderId) {
+        this.orderId = orderId;
+    }
+
+    public String getOrderDate() {
+        return orderDate;
+    }
+
+    public void setOrderDate(String orderDate) {
+        this.orderDate = orderDate;
+    }
+
+    public double getOrderCost() {
+        return orderCost;
+    }
+
+    public void setOrderCost(double orderCost) {
+        this.orderCost = orderCost;
+    }
+
+    public String getCustomerName() {
+        return customerName;
+    }
+
+    public void setCustomerName(String customerName) {
+        this.customerName = customerName;
+    }
+
+    public String getCustomerMobile() {
+        return customerMobile;
+    }
+
+    public void setCustomerMobile(String customerMobile) {
+        this.customerMobile = customerMobile;
+    }
 }
 
 // File: item-service/src/main/java/com/synechron/repository/ItemRepository.java
@@ -90,13 +158,11 @@ package com.synechron.controller;
 
 import com.synechron.entity.Item;
 import com.synechron.service.ItemService;
+import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Configuration;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import jakarta.validation.Valid;
 import java.util.List;
 
 @RestController
@@ -133,7 +199,7 @@ public class ItemController {
 }
 
 
-// --- ORDER SERVICE ---
+// === ORDER SERVICE ===
 
 // File: order-service/src/main/java/com/synechron/entity/Order.java
 package com.synechron.entity;
@@ -163,7 +229,53 @@ public class Order {
     @Transient
     private ItemDTO item;
 
-    // Getters and Setters
+    public Long getOrderId() {
+        return orderId;
+    }
+
+    public void setOrderId(Long orderId) {
+        this.orderId = orderId;
+    }
+
+    public LocalDate getOrderDate() {
+        return orderDate;
+    }
+
+    public void setOrderDate(LocalDate orderDate) {
+        this.orderDate = orderDate;
+    }
+
+    public double getOrderCost() {
+        return orderCost;
+    }
+
+    public void setOrderCost(double orderCost) {
+        this.orderCost = orderCost;
+    }
+
+    public String getCustomerName() {
+        return customerName;
+    }
+
+    public void setCustomerName(String customerName) {
+        this.customerName = customerName;
+    }
+
+    public String getCustomerMobile() {
+        return customerMobile;
+    }
+
+    public void setCustomerMobile(String customerMobile) {
+        this.customerMobile = customerMobile;
+    }
+
+    public ItemDTO getItem() {
+        return item;
+    }
+
+    public void setItem(ItemDTO item) {
+        this.item = item;
+    }
 }
 
 // File: order-service/src/main/java/com/synechron/dto/ItemDTO.java
@@ -174,7 +286,29 @@ public class ItemDTO {
     private String itemName;
     private double itemPrice;
 
-    // Getters and Setters
+    public Long getItemId() {
+        return itemId;
+    }
+
+    public void setItemId(Long itemId) {
+        this.itemId = itemId;
+    }
+
+    public String getItemName() {
+        return itemName;
+    }
+
+    public void setItemName(String itemName) {
+        this.itemName = itemName;
+    }
+
+    public double getItemPrice() {
+        return itemPrice;
+    }
+
+    public void setItemPrice(double itemPrice) {
+        this.itemPrice = itemPrice;
+    }
 }
 
 // File: order-service/src/main/java/com/synechron/repository/OrderRepository.java
@@ -229,13 +363,11 @@ package com.synechron.controller;
 
 import com.synechron.entity.Order;
 import com.synechron.service.OrderService;
+import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Configuration;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import jakarta.validation.Valid;
 import java.util.List;
 
 @RestController
@@ -270,12 +402,3 @@ public class OrderController {
         return ResponseEntity.notFound().build();
     }
 }
-
-// --- SQL SETUP ---
--- Delete old database (MySQL)
-DROP DATABASE IF EXISTS microservicedb;
-
--- Create new database
-CREATE DATABASE microservicedb;
-
--- You can now connect your services to this DB using spring.datasource.url=jdbc:mysql://localhost:3306/microservicedb
