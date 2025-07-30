@@ -547,4 +547,42 @@ public class OrderServiceApplication {
         SpringApplication.run(OrderServiceApplication.class, args);
     }
 }
+_______________________
+public List<Order> getAllOrdersWithItems() {
+    List<Order> orders = orderRepository.findAll();
+
+    for (Order order : orders) {
+        try {
+            Item item = itemClient.getItemById(order.getItemId());
+            order.setItem(item);
+        } catch (Exception e) {
+            // Log and skip if item not found or Feign fails
+            order.setItem(null);
+        }
+    }
+
+    return orders;
+}
+
+
+@GetMapping("/order/item")
+public ResponseEntity<List<Order>> getAllOrdersWithItems() {
+    List<Order> ordersWithItems = orderService.getAllOrdersWithItems();
+    return ResponseEntity.ok(ordersWithItems);
+}
+
+
+package com.yourcompany.orderservice.client;
+
+import com.yourcompany.orderservice.model.Item;
+import org.springframework.cloud.openfeign.FeignClient;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+
+@FeignClient(name = "item-service")
+public interface ItemClient {
+
+    @GetMapping("/item/{id}")
+    Item getItemById(@PathVariable("id") Long id);
+}
 
